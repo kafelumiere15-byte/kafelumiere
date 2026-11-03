@@ -1,0 +1,64 @@
+:root {
+  /* ---- Brand palette: roasted coffee browns + a warm caramel accent ---- */
+  --espresso: #2c1c12;
+  --roast: #553c2c;
+  --caramel: #c3813f;
+  --caramel-dark: #9c6428;
+  --caramel-light: #e3a768;
+  --cream: #faf5ec;
+  --latte: #ecdfc8;
+  --ink: #2a1d14;
+  --ink-soft: #6c5a4a;
+
+  /* ---- Elevation + radius scale, used everywhere so surfaces feel like one system ---- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 8px rgba(44, 28, 18, .08);
+  --shadow-md: 0 8px 24px rgba(44, 28, 18, .10);
+  --shadow-lg: 0 18px 44px rgba(44, 28, 18, .16);
+
+  /* ---- Type ---- */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .brand {
+  font-family: var(--font-display);
+  color: var(--espresso);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+p { line-height: 1.6; }
+
+/* every page's title + one-line subtitle, kept to one consistent rhythm */
+.page-head { margin-bottom: 2rem; }
+.page-head h1 { margin-bottom: .3rem; }
+.page-head p { color: var(--ink-soft); margin: 0; max-width: 60ch; }
+
+a { color: var(--caramel-dark); }
+a:hover { color: var(--espresso); }
+
+:focus-visible {
+  outline: 3px solid var(--caramel-light);
+  outline-offset: 2px;
+}
+
+::selection { background: var(--caramel-light); color: var(--espresso); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
