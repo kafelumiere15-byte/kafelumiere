@@ -129,7 +129,12 @@
 .form-control:focus { border-color: var(--caramel); box-shadow: 0 0 0 .2rem rgba(195,129,63,.22); }
 .auth-card a { color: var(--caramel-dark); font-weight: 500; }
 
-.panel-card { background: #fff; border-radius: var(--radius-md); padding: 1.6rem; box-shadow: var(--shadow-sm); height: 100%; }
+/* NOTE: no "height: 100%" here on purpose. Flexbox/grid rows already stretch same-row
+   cards to equal height automatically (the default align-items: stretch behavior) - an
+   explicit height:100% here used to also hit cards that are simply stacked one above the
+   other (like Checkout's Payment method + Note cards), making each one try to fill the
+   whole column independently and overflow past it, overlapping the footer below. */
+.panel-card { background: #fff; border-radius: var(--radius-md); padding: 1.6rem; box-shadow: var(--shadow-sm); }
 .stat-number { font-size: 2.3rem; font-family: var(--font-display); color: var(--caramel-dark); font-weight: 600; }
 .role-badge { display: inline-block; padding: .18rem .75rem; border-radius: 12px; font-size: .78rem; font-weight: 600; text-transform: capitalize; background: var(--latte); color: var(--roast); }
 .role-badge.admin { background: #f3d9d0; color: #8a3b24; }
@@ -211,11 +216,10 @@ a.role-badge { text-decoration: none; }
 .cart-issue { color: #8a3b24; font-weight: 700; font-size: .85rem; margin-top: .2rem; }
 .cart-line-total { min-width: 90px; text-align: right; font-family: var(--font-display); font-weight: 600; color: var(--caramel-dark); }
 
-/* A sticky card must keep its own natural (shorter) height - not the 100% height
-   .panel-card normally gets from stretching to match its taller sibling column.
-   Without this, the page's measured height comes out too short and the footer
-   ends up overlapping whatever spills past it from the taller column. */
-.summary-card { position: sticky; top: 5.5rem; height: auto; align-self: flex-start; }
+/* A sticky card must keep its own natural (shorter) height - stretching it to match a
+   taller sibling column fights the sticky positioning and can throw off the page's
+   measured height, so it keeps its own content height and aligns to the column's start. */
+.summary-card { position: sticky; top: 5.5rem; align-self: flex-start; }
 .row > [class*="col-"]:has(> .summary-card) { align-self: flex-start; }
 .summary-row { display: flex; justify-content: space-between; margin-bottom: .45rem; }
 .summary-total { font-size: 1.28rem; font-family: var(--font-display); }
@@ -297,7 +301,7 @@ a.role-badge { text-decoration: none; }
 .pos-tile-price { font-family: var(--font-display); color: var(--caramel-dark); font-weight: 600; }
 .pos-tile-off { font-size: .72rem; color: #8a3b24; font-weight: 700; }
 
-.pos-ticket { position: sticky; top: 5.5rem; height: auto; align-self: flex-start; }
+.pos-ticket { position: sticky; top: 5.5rem; align-self: flex-start; }
 .row > [class*="col-"]:has(> .pos-ticket) { align-self: flex-start; }
 .pos-line { display: flex; align-items: center; gap: .6rem; padding: .55rem 0; border-bottom: 1px solid var(--latte); }
 .pos-line-name { flex: 1; font-weight: 600; min-width: 0; }
