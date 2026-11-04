@@ -58,7 +58,8 @@ export const successMsg = (message = '') => toast.success(message, { position: '
 // server address without /api/v1  (uploaded images live at <origin>/uploads/...)
 export const API_ORIGIN = API.replace(/\/api\/v1\/?$/, '');
 
-export const imageUrl = (image) => (image && image.url ? `${API_ORIGIN}${image.url}` : null);
+export const imageUrl = (image) =>
+    image && image.url ? (/^https?:\/\//.test(image.url) ? image.url : `${API_ORIGIN}${image.url}`) : null;
 
 export const formatPrice = (amount) =>
     new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount || 0);
