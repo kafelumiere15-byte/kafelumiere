@@ -1,25 +1,19 @@
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require('./cloudinary');
 
-const UPLOAD_ROOT = path.join(__dirname, '..', 'uploads');
-
-// delete an uploaded image by its public url (e.g. /uploads/products/abc.jpg)
-const removeFileByUrl = (url) => {
-    if (!url || !url.startsWith('/uploads/')) return;
-    const full = path.join(__dirname, '..', url);
-    // safety: never delete anything outside the uploads folder
-    if (!full.startsWith(UPLOAD_ROOT + path.sep)) return;
-    fs.unlink(full, () => { /* ignore "file not found" */ });
+// delete an uploaded image from Cloudinary by its public_id (stored as "filename" on the product)
+const removeFileByPublicId = (publicId) => {
+    if (!publicId) return;
+    cloudinary.uploader.destroy(publicId, () => { /* ignore "not found" */ });
 };
 
-// delete the files multer just saved (used when validation fails afterwards)
+// delete the files multer/Cloudinary just saved (used when validation fails afterwards)
 const removeMulterFiles = (files) => {
-    (files || []).forEach(file => removeFileByUrl(`/uploads/products/${file.filename}`));
+    (files || []).forEach(file => removeFileByPublicId(file.filename));
 };
 
-// delete every photo of a product (list of { url })
+// delete every photo of a product (list of { filename, url })
 const removeProductImages = (images) => {
-    (images || []).forEach(img => removeFileByUrl(img && img.url));
+    (images || []).forEach(img => removeFileByPublicId(img && img.filename));
 };
 
-module.exports = { removeFileByUrl, removeMulterFiles, removeProductImages };
+module.exports = { removeFileByPublicId, removeMulterFiles, removeProductImages };
