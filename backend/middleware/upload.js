@@ -1,21 +1,21 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const crypto = require('crypto');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../utils/cloudinary');
 
-const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'products');
-fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-const EXT = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
+const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 // a product's photo count is NOT limited; this is only a technical ceiling so a mistaken
 // upload of thousands of files at once can't take the server down
 const TECHNICAL_CEILING = 500;
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${EXT[file.mimetype]}`);
-    }
+// photos are uploaded straight to Cloudinary (not saved to the server's own disk), because
+// Render's free-tier disk is wiped on every deploy/restart, which was deleting product photos
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: async (req, file) => ({
+        folder: 'kafe-lumiere/products',
+        format: EXT[file.mimetype],
+        public_id: `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`,
+    }),
 });
 
 const fileFilter = (req, file, cb) => {
