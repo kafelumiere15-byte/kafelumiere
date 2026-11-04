@@ -9,8 +9,9 @@ const { removeMulterFiles, removeProductImages } = require('../utils/files');
 
 const OBJECT_ID = /^[a-f\d]{24}$/i;
 
-// one saved photo (multer already wrote the file to uploads/products)
-const imageFromFile = (file) => ({ filename: file.filename, url: `/uploads/products/${file.filename}` });
+// one saved photo (multer-storage-cloudinary already uploaded it to Cloudinary;
+// file.filename is the Cloudinary public_id, file.path is the permanent https url)
+const imageFromFile = (file) => ({ filename: file.filename, url: file.path });
 
 const isTrue = (v) => v === true || v === 'true' || v === '1' || v === 'on';
 
