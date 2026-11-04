@@ -1,35 +1,60 @@
-// Sends email through the SMTP account in config/.env (SMTP_HOST, SMTP_PORT, SMTP_EMAIL, SMTP_PASSWORD, ...)
-const nodemailer = require('nodemailer');
+// Sends email via Brevo's HTTPS API (https://developers.brevo.com) instead of raw SMTP.
+// Switched from nodemailer+SMTP because Render's free tier blocks/times out outbound SMTP
+// connections (both port 587 and 465 timed out), while plain HTTPS - which this uses - works
+// fine. Needs BREVO_API_KEY in config/.env: sign up free at brevo.com, verify a sender email
+// under Senders, Domains & Dedicated IPs -> Senders, then create an API key under
+// Settings -> SMTP & API -> API Keys.
 
-let transporter = null;
+const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
-const getTransporter = () => {
-    if (!transporter) {
-        const port = Number(process.env.SMTP_PORT) || 587;
-        transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port,
-            secure: port === 465,
-            auth: { user: process.env.SMTP_EMAIL, pass: process.env.SMTP_PASSWORD },
-        });
-    }
-    return transporter;
-};
+const toBase64 = (content) => (Buffer.isBuffer(content) ? content : Buffer.from(String(content))).toString('base64');
 
 const sendEmail = async ({ to, subject, text, html, attachments = [] }) => {
-    if (!process.env.SMTP_HOST || !process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-        throw new Error('Email is not configured (SMTP settings are missing in config/.env)');
-    }
-    const fromName = process.env.SMTP_FROM_NAME || 'Kafé Lumière';
+    const apiKey = process.env.BREVO_API_KEY;
     const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_EMAIL;
-    return getTransporter().sendMail({
-        from: `"${fromName}" <${fromEmail}>`,
-        to,
+    const fromName = process.env.SMTP_FROM_NAME || 'Kafé Lumière';
+
+    if (!apiKey || !fromEmail) {
+        throw new Error('Email is not configured (BREVO_API_KEY / SMTP_FROM_EMAIL are missing in config/.env)');
+    }
+
+    const body = {
+        sender: { email: fromEmail, name: fromName },
+        to: [{ email: to }],
         subject,
-        text,
-        html,
-        attachments,
+    };
+
+    // Brevo requires htmlContent (or textContent); prefer html, fall back to plain text wrapped in <pre>
+    if (html) {
+        body.htmlContent = html;
+    } else if (text) {
+        body.textContent = text;
+    } else {
+        body.textContent = ' ';
+    }
+    if (text) body.textContent = text;
+
+    if (attachments.length > 0) {
+        body.attachment = attachments.map((a) => ({
+            name: a.filename,
+            content: toBase64(a.content),
+        }));
+    }
+
+    const res = await fetch(BREVO_URL, {
+        method: 'POST',
+        headers: {
+            'api-key': apiKey,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        body: JSON.stringify(body),
     });
+
+    if (!res.ok) {
+        const detail = await res.text().catch(() => '');
+        throw new Error(`Brevo error ${res.status}: ${detail.slice(0, 300)}`);
+    }
 };
 
 module.exports = sendEmail;
