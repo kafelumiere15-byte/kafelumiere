@@ -23,7 +23,7 @@
     "multer": "^2.4.0",
     "nodemailer": "^7.0.0",
     "nodemon": "^3.1.14",
-    "cloudinary": "^2.5.1",
+    "cloudinary": "^1.41.3",
     "multer-storage-cloudinary": "^4.0.0",
     "validator": "^13.15.35"
   }
